@@ -33,7 +33,7 @@ sequenceDiagram
 
     browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/data.json
     activate server
-    note over server: The server looks up all submitted notes, including the newly created one, and returns them as JSON
+    note left of server: The server looks up all submitted notes, including the newly created one, and returns them as JSON
     server-->>browser: [{ "content": "HTML is easy", "date": "2023-1-1" }, ... ]
     deactivate server
 
@@ -79,9 +79,9 @@ sequenceDiagram
     participant browser
     participant server
 
-    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa with BODY {"content": "new note", "date": "2025-02-01T07:38:05.828Z"}
+    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/ <br> BODY: {"content": "new note", "date": "2025-02-01T07:38:05.828Z"}
     activate server
-    server-->>browser: 201 Created with BODY {"message":"note created"}
+    server-->>browser: 201 Created {"message":"note created"}
     deactivate server
 
     Note right of browser: The browser executes the callback function that renders the notes
