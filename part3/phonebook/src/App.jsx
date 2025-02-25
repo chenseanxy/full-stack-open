@@ -112,6 +112,15 @@ const App = () => {
             }
           ).then(
             () => displayNotification(`Updated ${person.name}`)
+          ).catch(
+            error => {
+              console.log(`Error when updating ${person.name}`, error)
+              displayNotification(
+                `Error when updating ${person.name}: `+
+                `${error.response.data.error}`
+              )
+              reSync()
+            }
           )
       }
     } else {
@@ -121,6 +130,15 @@ const App = () => {
           resp => setPersons(persons.concat(resp.data))
         ).then(
           () => displayNotification(`Added ${person.name}`)
+        ).catch(
+          error => {
+            console.log(`Error when adding ${person.name}`, error)
+            displayNotification(
+              `Error when adding ${person.name}: `+
+              `${error.response.data.error}`
+            )
+            reSync()
+          }
         )
     }
     setNewName('')
@@ -139,7 +157,7 @@ const App = () => {
             console.log(`Error when removing ${person.name}`, error)
             displayNotification(
               `Error when removing ${person.name}: `+
-              `${error.response.data}`
+              `${error.response.data.error}`
             )
             reSync()
           }
