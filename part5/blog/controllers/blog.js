@@ -1,7 +1,4 @@
-const jwt = require('jsonwebtoken')
-
 const Blog = require('../models/blog')
-const User = require('../models/user')
 const { authenticatedUser } = require('../middlewares')
 const blogRouter = require('express').Router()
 
@@ -26,9 +23,11 @@ blogRouter.delete('/:id', authenticatedUser, async (request, response) => {
     if (!blog) {
         return response.status(404).json({ error: 'Blog not found' })
     }
-    if (blog.user.toString() !== user._id.toString()) {
+    if (!blog.user || blog.user.toString() !== user._id.toString()) {
         return response.status(401).json({ error: 'unauthorized' })
     }
+    user.blogs = user.blogs.filter(b => b != blog._id)
+    await user.save()
     await blog.deleteOne()
     response.status(204).end()
 })

@@ -10,12 +10,13 @@ const User = require('../models/user')
 
 const api = supertest(app)
 
+let preparedUser = null
 let authenticatedAs = null
 let authenticatedToken = null
 
 before(async () => {
     await User.deleteMany({})
-    const preparedUser = await User.prepareInsert(mockData.users[0])
+    preparedUser = await User.prepareInsert(mockData.users[0])
     authenticatedAs = await new User(preparedUser).save()
     authenticatedToken = await authenticatedAs.issueToken()
 })
@@ -23,6 +24,9 @@ before(async () => {
 beforeEach(async () => {
     await Blog.deleteMany({})
     await Blog.insertMany(mockData.blogs)
+    await User.deleteMany({})
+    authenticatedAs = await new User(preparedUser).save()
+    authenticatedToken = await authenticatedAs.issueToken()
 })
 
 test('blogs are returned as json', async () => {
@@ -132,10 +136,22 @@ describe('adding blogs', () => {
     
 })
 
-
 test('deleting a blog post', async () => {
-    const blogsAtStart = await api.get('/api/blogs')
-    const blogToDelete = blogsAtStart.body[0]
+    const newBlog = {
+        title: 'New Blog',
+        author: 'Author Name',
+        url: 'http://example.com',
+        likes: 0
+    }
+
+    const response = await api
+        .post('/api/blogs')
+        .set('Authorization', `Bearer ${authenticatedToken}`)
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+    const blogToDelete = response.body
 
     await api
         .delete(`/api/blogs/${blogToDelete.id}`)
@@ -144,7 +160,7 @@ test('deleting a blog post', async () => {
         .expect(204)
 
     const finalBlogs = await api.get('/api/blogs')
-    assert.strictEqual(finalBlogs.body.length, mockData.blogs.length - 1)
+    assert.strictEqual(finalBlogs.body.length, mockData.blogs.length)
     assert(!finalBlogs.body.find(blog => blog.id === blogToDelete.id))
 })
 
