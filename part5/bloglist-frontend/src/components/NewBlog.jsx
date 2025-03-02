@@ -1,21 +1,13 @@
 import { useState } from 'react'
-import blogService from '../services/blogs'
 
-const NewBlog = ({ loggedInUser, appendBlog, showNotification }) => {
+const NewBlog = ({ onNewBlog }) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
 
-  const onNewBlog = async (event) => {
+  const handleNewBlog = async (event) => {
     event.preventDefault()
-    let newBlog = null
-    try {
-      newBlog = await blogService.create({ title, author, url }, loggedInUser.token)
-    } catch (error) {
-      showNotification(`Error when creating new blog: ${error.response.data.error}`, 'error')
-    }
-    appendBlog(newBlog)
-    showNotification(`new blog ${newBlog.title} by ${newBlog.author} added`)
+    await onNewBlog({ title, author, url })
     setTitle('')
     setAuthor('')
     setUrl('')
@@ -24,11 +16,12 @@ const NewBlog = ({ loggedInUser, appendBlog, showNotification }) => {
   return (
     <div>
       <h2>create new</h2>
-      <form onSubmit={onNewBlog}>
+      <form onSubmit={handleNewBlog}>
         <div>
           title:
           <input
             value={title}
+            data-testid="title-input"
             onChange={({ target }) => setTitle(target.value)}
           />
         </div>
@@ -36,17 +29,19 @@ const NewBlog = ({ loggedInUser, appendBlog, showNotification }) => {
           author:
           <input
             value={author}
+            data-testid="author-input"
             onChange={({ target }) => setAuthor(target.value)}
           />
         </div>
         <div>
           url:
           <input
+            data-testid="url-input"
             value={url}
             onChange={({ target }) => setUrl(target.value)}
           />
         </div>
-        <button type="submit">create</button>
+        <button type="submit" data-testid="create-button">create</button>
       </form>
     </div>
   )

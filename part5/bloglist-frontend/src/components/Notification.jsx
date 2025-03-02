@@ -9,7 +9,7 @@ const Notification = ({ message, type }) => {
     return null
   }
   return (
-    <div style={style_}>
+    <div style={style_} data-testid='notification'>
       {message}
     </div>
   )

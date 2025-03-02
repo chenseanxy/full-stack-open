@@ -25,12 +25,9 @@ const userSchema = new mongoose.Schema({
     ],
 }, {
     statics: {
-        async hashPassword(password) {
-            const saltRounds = 10
-            return await bcrypt.hash(password, saltRounds)
-        },
         async prepareInsert({ username, name, password }) {
-            const passwordHash = await this.hashPassword(password)
+            const saltRounds = 10
+            const passwordHash = await bcrypt.hash(password, saltRounds)
             return {
                 username,
                 name,

@@ -55,19 +55,33 @@ const App = () => {
     )
   }
 
-  const onNewBlog = (blog) => {
-    setBlogs(blogs.concat(blog))
+  const onNewBlog = async (blog) => {
+    let newBlog = null
+    try {
+      newBlog = await blogService.create(blog, loggedInUser.token)
+      showNotification(`new blog ${newBlog.title} by ${newBlog.author} added`)
+    } catch (error) {
+      console.error(error)
+      showNotification(`Error when creating new blog: ${error.response.data.error}`, 'error')
+      return
+    }
+    setBlogs(blogs.concat(newBlog))
     newBlogRef.current.toggleVisibility()
   }
 
-  const onBlogChange = (blog) => {
+  const onBlogChange = async (blog) => {
+    const updatedBlog = { ...blog }
+    if (updatedBlog.user) updatedBlog.user = updatedBlog.user.id
+    const finalBlog = await blogService.update(updatedBlog)
+
     const newBlogs = [...blogs]
-    const index = newBlogs.findIndex(b => b.id === blog.id)
-    newBlogs[index] = blog
+    const index = newBlogs.findIndex(b => b.id === finalBlog.id)
+    newBlogs[index] = finalBlog
     setBlogs(newBlogs)
   }
 
-  const onBlogDelete = (blog) => {
+  const onBlogDelete = async (blog) => {
+    await blogService.remove(blog, loggedInUser.token)
     setBlogs(blogs.filter(b => b.id !== blog.id))
   }
 
@@ -75,12 +89,14 @@ const App = () => {
     <div>
       <Notification message={notificationMessage} type={notificationType} />
       <Togglable buttonLabel="new blog" ref={newBlogRef}>
-        <NewBlog loggedInUser={loggedInUser} appendBlog={onNewBlog} showNotification={showNotification}/>
+        <NewBlog onNewBlog={onNewBlog} />
       </Togglable>
       <h2>blogs</h2>
-      {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
-        <Blog key={blog.id} blog={blog} onChange={onBlogChange} onDelete={onBlogDelete} loggedInUser={loggedInUser}/>
-      )}
+      <div data-testid='blogs'>
+        {blogs.sort((a, b) => b.likes - a.likes).map(blog => (
+          <Blog key={blog.id} blog={blog} onChange={onBlogChange} onDelete={onBlogDelete} loggedInUser={loggedInUser} />
+        ))}
+      </div>
       <p>
         logged in as {loggedInUser.name} ({loggedInUser.username})
         <button onClick={() => setLoggedInUser(null)}>logout</button>

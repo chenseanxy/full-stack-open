@@ -22,9 +22,7 @@ const Blog = ({ blog, onChange, onDelete, loggedInUser }) => {
 
   const handleLike = async () => {
     let updatedBlog = { ...blog, likes: blog.likes + 1 }
-    if (updatedBlog.user) updatedBlog.user = updatedBlog.user.id
-    const finalBlog = await blogService.update(updatedBlog)
-    onChange(finalBlog)
+    onChange(updatedBlog)
   }
 
 
@@ -32,7 +30,6 @@ const Blog = ({ blog, onChange, onDelete, loggedInUser }) => {
     if (!window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
       return
     }
-    await blogService.remove(blog, loggedInUser.token)
     onDelete(blog)
   }
 
@@ -41,11 +38,11 @@ const Blog = ({ blog, onChange, onDelete, loggedInUser }) => {
     : null
 
   return (
-    <div style={blogStyle}>
+    <div style={blogStyle} className='blog-entry'>
       {blog.title} {blog.author} <button onClick={() => setDetailsVisible(false)}>hide</button>
       <br />
       url: {blog.url} <br />
-      likes: {blog.likes} <button onClick={handleLike}>like</button> <br />
+      likes: {blog.likes} <button onClick={handleLike} data-testid='like-button'>like</button> <br />
       added by: {
         blog.user
           ? blog.user.username === loggedInUser.username

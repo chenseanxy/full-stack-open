@@ -12,7 +12,9 @@ const Login = ({ setLoggedInUser, showNotification }) => {
       user = await loginService.login({ username, password })
     } catch (error) {
       showNotification(`Error when logging in: ${error.response.data.error}`, 'error')
+      return
     }
+    showNotification(`Logged in as ${user.name}`, 'info')
     setLoggedInUser(user)
     setUsername('')
     setPassword('')
@@ -20,23 +22,25 @@ const Login = ({ setLoggedInUser, showNotification }) => {
   return (
     <div>
       <h2>log in to application</h2>
-      <form onSubmit={onLogin}>
+      <form onSubmit={onLogin} data-testid='login-form'>
         <div>
           username
           <input
             value={username}
+            data-testid='username-input'
             onChange={({ target }) => setUsername(target.value)}
           />
         </div>
         <div>
           password
           <input
+            data-testid='password-input'
             type="password"
             value={password}
             onChange={({ target }) => setPassword(target.value)}
           />
         </div>
-        <button type="submit">login</button>
+        <button type="submit" data-testid="login-button">login</button>
       </form>
     </div>
   )
